@@ -206,3 +206,11 @@ GO
 --- Sử dụng view đã tạo để truy vấn sinh viên nợ môn theo học kỳ
 SELECT * FROM V_SINHVIEN_NO_MON WHERE Ma_HK='HK05';
 GO
+--- Thêm đăng ký học phần cho sinh viên
+INSERT INTO DANGKY (Ma_SV, Ma_LHP)
+VALUES ('SV00001', 'LHP0301');
+GO
+--- Xóa đăng ký học phần cho sinh viên
+DELETE FROM DANGKY
+WHERE Ma_SV = 'SV00001' AND Ma_LHP = 'LHP0301';
+GO
