@@ -1,22 +1,31 @@
 require('dotenv').config();
 const sql = require('mssql');
 
+const trustServerCertEnv = process.env.DB_TRUST_SERVER_CERTIFICATE;
+const trustServerCert = trustServerCertEnv === undefined
+  ? true
+  : trustServerCertEnv === 'true';
+
 const config = {
   driver: process.env.DB_DRIVER || 'ODBC Driver 17 for SQL Server',
-  server: process.env.DB_SERVER,
-  database: process.env.DB_DATABASE,
+  server: process.env.DB_SERVER || 'MSI\\SQLEXPRESS',
+  database: process.env.DB_DATABASE || 'QLSINHVIEN1',
   options: {
     trustedConnection: (process.env.DB_TRUSTED_CONNECTION === 'true'),
-    trustServerCertificate: (process.env.DB_TRUST_SERVER_CERTIFICATE === 'true'),
+    trustServerCertificate: trustServerCert,
     enableArithAbort: true,
   },
   authentication: {
     type: 'default'
   }
 };
-if (process.env.DB_USER && process.env.DB_USER.trim() !== '') {
-  config.user = process.env.DB_USER;
-  config.password = process.env.DB_PASSWORD;
+
+const dbUser = process.env.DB_USER ?? 'sa';
+const dbPassword = process.env.DB_PASSWORD ?? '123';
+
+if (dbUser && dbUser.trim() !== '') {
+  config.user = dbUser;
+  config.password = dbPassword;
   delete config.options.trustedConnection;
 }
 
@@ -26,7 +35,10 @@ const poolPromise = new sql.ConnectionPool(config)
     console.log('Connected to MSSQL');
     return pool;
   })
-  .catch(err => console.log('Database connection failed: ', err));
+  .catch(err => {
+    console.error('Database connection failed:', err);
+    throw err;
+  });
 
 module.exports = {
   sql, poolPromise
